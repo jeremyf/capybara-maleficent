@@ -1,4 +1,5 @@
 require 'active_support/core_ext/array/wrap'
+require 'capybara/maleficent/logger'
 
 module Capybara
   module Maleficent
@@ -7,9 +8,12 @@ module Capybara
       def initialize(**kargs)
         self.sleep_durations = kargs.fetch(:sleep_durations) { [3, 10] }
         self.handled_exceptions = kargs.fetch(:handled_exceptions) { [] }
+        self.logger = kargs.fetch(:logger) { Capybara::Maleficent::Logger.new }
       end
 
       attr_accessor :handled_exceptions
+
+      attr_accessor :logger
 
       # Used to determine the number of sleeps to attempt, and the duration of each of those sleeps.
       # @return An array of integers
