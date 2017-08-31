@@ -50,7 +50,7 @@ module Capybara
       @configuration || Configuration.new
     end
 
-    def self.config
+    def self.configure
       @configuration = Configuration.new
       yield(@configuration)
       @configuration
