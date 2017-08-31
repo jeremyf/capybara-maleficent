@@ -5,36 +5,27 @@ unless defined?(Capybara::Maleficent::Spindle)
   module Capybara::Maleficent::Spindle
   end
 
-  require "capybara/rspec/matchers"
   require "capybara/node/matchers"
-
-  # Re-open these classes as `super` was not working
-  class Capybara::RSpecMatchers::Matcher
-    def wrap_matches?(actual)
-      Capybara::Maleficent.with_sleep_injection(handled_exceptions: [Capybara::ExpectationNotMet]) do
-        wrap(actual)
-      end
-    rescue Capybara::ExpectationNotMet => e
-      @failure_message = e.message
-      return false
-    end
-  end
-
   module Capybara::Node::Matchers
-    def has_selector?(*args, &optional_filter_block)
-      Capybara::Maleficent.with_sleep_injection(handled_exceptions: [Capybara::ExpectationNotMet]) do
-        assert_selector(*args, &optional_filter_block)
+    # I was encountering issues with module inclusion and super method. This is
+    # an alternative to super. I grab the method (in this case instance method
+    # because it's a module), redefine the method to wrap the original method.
+    #
+    # http://blog.jayfields.com/2008/04/alternatives-for-redefining-methods.html
+    [
+      :assert_selector,
+      :assert_no_selector,
+      :assert_matches_selector,
+      :assert_not_matches_selector,
+      :assert_text,
+      :assert_no_text
+    ].each do |method_name|
+      original_method = instance_method(method_name)
+      define_method method_name do |*args, &block|
+        Capybara::Maleficent.with_sleep_injection(handled_exceptions: [Capybara::ExpectationNotMet]) do
+          original_method.bind(self).call(*args, &block)
+        end
       end
-    rescue Capybara::ExpectationNotMet
-      false
-    end
-
-    def has_no_selector?(*args, &optional_filter_block)
-      Capybara::Maleficent.with_sleep_injection(handled_exceptions: [Capybara::ExpectationNotMet]) do
-        assert_no_selector(*args, &optional_filter_block)
-      end
-    rescue Capybara::ExpectationNotMet
-      false
     end
   end
 end
