@@ -13,7 +13,7 @@ The nature of `Capybara::Maleficent` is such that most of the time the matching 
 In you Gemfile:
 
 ```ruby
-gem 'capybara-maleficent', require 'false'
+gem 'capybara-maleficent', require: 'false'
 ```
 
 In your `spec/spec_helper.rb`
